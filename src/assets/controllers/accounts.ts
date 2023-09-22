@@ -17,7 +17,13 @@ interface RegisterDepositResponse {
   name: string;
   balance: number;
 }
+interface GetAccountResponse {
+  id: string;
+  name: string;
+  balance: number;
+}
 
+const getAllAccountResponses: GetAccountResponse[] = [];
 const Accounts: Account[] = [];
 
 const createAccount = (req: Request, res: Response) => {
@@ -32,8 +38,20 @@ const createAccount = (req: Request, res: Response) => {
   }
 };
 
-const getAllAccounts = (req: Request, res: Response) =>
-  res.status(200).json(Accounts);
+const getAllAccounts = (req: Request, res: Response) => {
+  Accounts.forEach((account) => {
+    const { id } = account;
+    const { name } = account;
+    const { balance } = account;
+    const AllAccountResponse: GetAccountResponse = {
+      id,
+      name,
+      balance,
+    };
+    getAllAccountResponses.push(AllAccountResponse);
+  });
+  res.status(200).json(getAllAccountResponses);
+};
 
 const getAccount = (req: Request, res: Response) => {
   try {
@@ -43,7 +61,15 @@ const getAccount = (req: Request, res: Response) => {
     if (getAccountdtl === undefined) {
       res.status(404).send('None');
     } else {
-      res.status(200).json(getAccountdtl);
+      const {id} = getAccountdtl;
+      const {name} = getAccountdtl;
+      const {balance} = getAccountdtl;
+      const AccountResponse: GetAccountResponse = {
+        id,
+        name,
+        balance,
+      };
+      res.status(200).json(AccountResponse);
     }
   } catch (error) {
     res.status(500).json('Something went wrong');
