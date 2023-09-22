@@ -3,8 +3,6 @@ import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Deposit, Purchases, products } from './purchasingproducts';
-// eslint-disable-next-line import/no-cycle, @typescript-eslint/no-redeclare
-import productdetails from './products';
 
 interface Account {
   id: string;
@@ -77,8 +75,9 @@ const registerDeposit = (req: Request, res: Response) => {
     const id: string = uuidv4();
     const SimulatedDayDeposit = Number(req.headers['simulated-day']);
     const depositdate: Date = new Date();
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    const account = Accounts.find((account) => account.id === accountId);
+    const account = Accounts.find(
+      (curraccount) => curraccount.id === accountId
+    );
     if (account.DepositDetails === undefined) {
       account.DepositDetails = [];
     }
@@ -102,11 +101,29 @@ const registerDeposit = (req: Request, res: Response) => {
   }
 };
 
+const getSoldProductCount = (
+  productId: string,
+  simulationDay: number
+): number => {
+  let numberofproductSold = 0;
+  if (Accounts.length > 0) {
+    Accounts.forEach((account) => {
+      if (account.purchaseDetails !== undefined) {
+        account.purchaseDetails.forEach((purchase) => {
+          if (
+            purchase.productId === productId &&
+            purchase.SimulatedDayPurchase < simulationDay
+          ) {
+            numberofproductSold += 1;
+          }
+        });
+      }
+    });
+  }
+  return numberofproductSold;
+};
 const validateStock = (productid: string, simmulationDay: number): boolean => {
-  const soldstock = productdetails.getSoldProductCount(
-    productid,
-    simmulationDay
-  );
+  const soldstock = getSoldProductCount(productid, simmulationDay);
   const productStock = products.find(
     (product) => product.id === productid
   ).stock;
@@ -185,8 +202,7 @@ const validateInputPurchase = (req: Request): number => {
   );
   // Validate Input
   if (
-    // eslint-disable-next-line eqeqeq
-    Math.sign(purchaseSimulationDay) != 1 ||
+    Math.sign(purchaseSimulationDay) !== 1 ||
     findaccount === undefined ||
     purchaseproductId === undefined
   ) {
@@ -248,5 +264,6 @@ export default {
   getAllAccounts,
   registerDeposit,
   registerPurchase,
+  getSoldProductCount,
   Accounts,
 };

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-cycle */
 import { Request, Response } from 'express';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -34,35 +33,13 @@ const addProducts = (req: Request, res: Response) => {
   }
 };
 
-const getSoldProductCount = (
-  productId: string,
-  simulationDay: number
-): number => {
-  let numberofproductSold = 0;
-  if (Accounts.Accounts.length > 0) {
-    Accounts.Accounts.forEach((account) => {
-      if (account.purchaseDetails !== undefined) {
-        account.purchaseDetails.forEach((purchase) => {
-          if (
-            purchase.productId === productId &&
-            purchase.SimulatedDayPurchase < simulationDay
-          ) {
-            numberofproductSold += 1;
-          }
-        });
-      }
-    });
-  }
-  return numberofproductSold;
-};
-
 const getAllProducts = (req: Request, res: Response) => {
   try {
     let productscopy = [];
     productscopy = JSON.parse(JSON.stringify(products));
     // Check if any purchase happened
     productscopy.forEach((productcopy) => {
-      const numberofSoldStocks = getSoldProductCount(
+      const numberofSoldStocks = Accounts.getSoldProductCount(
         productcopy.id,
         Number(req.headers['simulated-day'])
       );
@@ -88,7 +65,7 @@ const getproductById = (req: Request, res: Response) => {
     if (productdtls.length === 0) {
       res.status(404).send('None');
     } else {
-      const numberofSoldStocks = getSoldProductCount(
+      const numberofSoldStocks = Accounts.getSoldProductCount(
         productdtls.id,
         Number(req.headers['simulated-day'])
       );
@@ -96,10 +73,8 @@ const getproductById = (req: Request, res: Response) => {
         productdtls.stock -= numberofSoldStocks;
       }
     }
-    const updatedproduct = productdtls.find(
-      (product) => product.id === productId
-    );
-    res.status(200).json(updatedproduct);
+
+    res.status(200).json(productdtls);
   } catch (error) {
     res.status(500).json('Something went wrong');
   }
@@ -109,5 +84,4 @@ export default {
   addProducts,
   getAllProducts,
   getproductById,
-  getSoldProductCount,
 };
