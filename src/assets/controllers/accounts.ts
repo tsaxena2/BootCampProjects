@@ -92,7 +92,7 @@ const registerDeposit = (req: Request, res: Response) => {
     const registerDepositRes: RegisterDepositResponse = {
       id,
       name: account.name,
-      balance: account.balance,
+      balance: amount,
     };
 
     return res.status(201).json(registerDepositRes);
