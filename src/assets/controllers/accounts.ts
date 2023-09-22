@@ -23,26 +23,35 @@ interface RegisterDepositResponse {
 const Accounts: Account[] = [];
 
 const createAccount = (req: Request, res: Response) => {
-  const id = uuidv4();
-  const { name } = req.body;
-  const balance = 0;
-  Accounts.push({ id, name, balance });
-  return res.status(201).json({ id, name, balance });
+  try {
+    const id = uuidv4();
+    const { name } = req.body;
+    const balance = 0;
+    Accounts.push({ id, name, balance });
+    return res.status(201).json({ id, name, balance });
+  } catch (error) {
+    return res.status(500).json('Something went wrong');
+  }
 };
 
 const getAllAccounts = (req: Request, res: Response) =>
   res.status(200).json(Accounts);
 
 const getAccount = (req: Request, res: Response) => {
-  const getAccountdtl = Accounts.filter(
-    (Account) => Account.id === req.params.accountId
-  );
-  if (getAccountdtl.length === 0) {
-    res.status(404).send('None');
-  } else {
-    res.status(200).json(getAccountdtl);
+  try {
+    const getAccountdtl = Accounts.filter(
+      (Account) => Account.id === req.params.accountId
+    );
+    if (getAccountdtl.length === 0) {
+      res.status(404).send('None');
+    } else {
+      res.status(200).json(getAccountdtl);
+    }
+  } catch (error) {
+    res.status(500).json('Something went wrong');
   }
 };
+
 // Validating the input request for register deposit
 const validateInputdeposit = (req: Request) => {
   const findaccount = Accounts.find(
@@ -59,33 +68,38 @@ const validateInputdeposit = (req: Request) => {
 };
 
 const registerDeposit = (req: Request, res: Response) => {
-  if (!validateInputdeposit(req)) {
-    return res.status(400).send('None');
-  }
-  const { accountId } = req.params;
-  const { amount } = req.body;
-  const id: string = uuidv4();
-  const SimulatedDayDeposit = Number(req.headers['simulated-day']);
-  const depositdate: Date = new Date();
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  const account = Accounts.find((account) => account.id === accountId);
-  if (account.DepositDetails === undefined) {
-    account.DepositDetails = [];
-  }
+  try {
+    if (!validateInputdeposit(req)) {
+      return res.status(400).send('None');
+    }
+    const { accountId } = req.params;
+    const { amount } = req.body;
+    const id: string = uuidv4();
+    const SimulatedDayDeposit = Number(req.headers['simulated-day']);
+    const depositdate: Date = new Date();
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    const account = Accounts.find((account) => account.id === accountId);
+    if (account.DepositDetails === undefined) {
+      account.DepositDetails = [];
+    }
 
-  const depositDetails: Deposit = {
-    id,
-    amount,
-    SimulatedDayDeposit,
-    depositdate,
-  };
-  account.DepositDetails.push(depositDetails);
-  const registerDepositRes: RegisterDepositResponse = {
-    id,
-    name: account.name,
-    balance: account.balance,
-  };
-  return res.status(201).json(registerDepositRes);
+    const depositDetails: Deposit = {
+      id,
+      amount,
+      SimulatedDayDeposit,
+      depositdate,
+    };
+    account.DepositDetails.push(depositDetails);
+    const registerDepositRes: RegisterDepositResponse = {
+      id,
+      name: account.name,
+      balance: account.balance,
+    };
+
+    return res.status(201).json(registerDepositRes);
+  } catch (error) {
+    return res.status(500).json('Something went wrong');
+  }
 };
 
 const validateStock = (productid: string, simmulationDay: number): boolean => {
@@ -196,29 +210,33 @@ const validateInputPurchase = (req: Request): number => {
 };
 
 const registerPurchase = (req: Request, res: Response) => {
-  const validatePurchase = validateInputPurchase(req);
-  if (validatePurchase !== 200) {
-    return res.status(validatePurchase).send('None');
+  try {
+    const validatePurchase = validateInputPurchase(req);
+    if (validatePurchase !== 200) {
+      return res.status(validatePurchase).send('None');
+    }
+    const account = Accounts.find(
+      (indaccount) => indaccount.id === req.params.accountId
+    );
+    const { productId } = req.body;
+    const SimulatedDayPurchase: Purchases['SimulatedDayPurchase'] = Number(
+      req.headers['simulated-day']
+    );
+
+    if (account.purchaseDetails === undefined) {
+      account.purchaseDetails = [];
+    }
+
+    const purchaseDetails: Purchases = {
+      productId,
+      SimulatedDayPurchase,
+    };
+    account.purchaseDetails.push(purchaseDetails);
+
+    return res.status(201).send('Success');
+  } catch (error) {
+    return res.status(500).json('Something went wrong');
   }
-  const account = Accounts.find(
-    (indaccount) => indaccount.id === req.params.accountId
-  );
-  const { productId } = req.body;
-  const SimulatedDayPurchase: Purchases['SimulatedDayPurchase'] = Number(
-    req.headers['simulated-day']
-  );
-
-  if (account.purchaseDetails === undefined) {
-    account.purchaseDetails = [];
-  }
-
-  const purchaseDetails: Purchases = {
-    productId,
-    SimulatedDayPurchase,
-  };
-  account.purchaseDetails.push(purchaseDetails);
-
-  return res.status(201).send('Success');
 };
 
 export default {

@@ -14,20 +14,24 @@ export interface Product {
   price: number;
 }
 const addProducts = (req: Request, res: Response) => {
-  const id = uuidv4();
-  const { title } = req.body;
-  const { description } = req.body;
-  const { price } = req.body;
-  const { stock } = req.body;
-  const productDetails: Product = {
-    id,
-    title,
-    description,
-    price,
-    stock,
-  };
-  products.push(productDetails);
-  res.status(201).json(productDetails);
+  try {
+    const id = uuidv4();
+    const { title } = req.body;
+    const { description } = req.body;
+    const { price } = req.body;
+    const { stock } = req.body;
+    const productDetails: Product = {
+      id,
+      title,
+      description,
+      price,
+      stock,
+    };
+    products.push(productDetails);
+    res.status(201).json(productDetails);
+  } catch (error) {
+    res.status(500).json('Something went wrong');
+  }
 };
 
 const getSoldProductCount = (
@@ -53,42 +57,52 @@ const getSoldProductCount = (
 };
 
 const getAllProducts = (req: Request, res: Response) => {
-  let productscopy = [];
-  productscopy = JSON.parse(JSON.stringify(products));
-  // Check if any purchase happened
-  productscopy.forEach((productcopy) => {
-    const numberofSoldStocks = getSoldProductCount(
-      productcopy.id,
-      Number(req.headers['simulated-day'])
-    );
-    const productdtls = productcopy;
-    if (numberofSoldStocks > 0) {
-      productdtls.stock -= numberofSoldStocks;
-    }
-  });
-  res.status(201).json(productscopy);
+  try {
+    let productscopy = [];
+    productscopy = JSON.parse(JSON.stringify(products));
+    // Check if any purchase happened
+    productscopy.forEach((productcopy) => {
+      const numberofSoldStocks = getSoldProductCount(
+        productcopy.id,
+        Number(req.headers['simulated-day'])
+      );
+      const productdtls = productcopy;
+      if (numberofSoldStocks > 0) {
+        productdtls.stock -= numberofSoldStocks;
+      }
+    });
+    res.status(201).json(productscopy);
+  } catch (error) {
+    res.status(500).json('Something went wrong');
+  }
 };
 
 const getproductById = (req: Request, res: Response) => {
-  let productscopy = [];
-  productscopy = JSON.parse(JSON.stringify(products));
-  const { productId } = req.params;
-  const productdtls = productscopy.find((product) => product.id === productId);
-  if (productdtls.length === 0) {
-    res.status(404).send('None');
-  } else {
-    const numberofSoldStocks = getSoldProductCount(
-      productdtls.id,
-      Number(req.headers['simulated-day'])
+  try {
+    let productscopy = [];
+    productscopy = JSON.parse(JSON.stringify(products));
+    const { productId } = req.params;
+    const productdtls = productscopy.find(
+      (product) => product.id === productId
     );
-    if (numberofSoldStocks > 0) {
-      productdtls.stock -= numberofSoldStocks;
+    if (productdtls.length === 0) {
+      res.status(404).send('None');
+    } else {
+      const numberofSoldStocks = getSoldProductCount(
+        productdtls.id,
+        Number(req.headers['simulated-day'])
+      );
+      if (numberofSoldStocks > 0) {
+        productdtls.stock -= numberofSoldStocks;
+      }
     }
+    const updatedproduct = productdtls.find(
+      (product) => product.id === productId
+    );
+    res.status(200).json(updatedproduct);
+  } catch (error) {
+    res.status(500).json('Something went wrong');
   }
-  const updatedproduct = productdtls.find(
-    (product) => product.id === productId
-  );
-  res.status(200).json(updatedproduct);
 };
 
 export default {
