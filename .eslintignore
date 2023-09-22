@@ -1,1 +1,9 @@
 node_modules
+jest.config.*
+main-with-require-overrides.js
+jest.*
+test-setup.ts
+global-teardown.ts
+global-setup.ts
+server.spec.ts
+dist
