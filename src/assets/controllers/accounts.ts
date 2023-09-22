@@ -1,10 +1,5 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable array-callback-return */
-/* eslint-disable consistent-return */
-/* eslint-disable @typescript-eslint/no-shadow */
 import { Request, Response } from 'express';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { v4 as uuidv4 } from 'uuid';
 
 import { Deposit, Purchases, products } from './purchasingproducts';
@@ -45,18 +40,18 @@ const getAccount = (req: Request, res: Response) => {
   if (getAccountdtl.length === 0) {
     res.status(404).send('None');
   } else {
-    return res.status(200).json(getAccountdtl);
+    res.status(200).json(getAccountdtl);
   }
 };
 // Validating the input request for register deposit
 const validateInputdeposit = (req: Request) => {
-  const account = Accounts.find(
+  const findaccount = Accounts.find(
     (account) => account.id === req.params.accountId
   );
   if (
     Math.sign(req.body.amount) === 1 &&
     Math.sign(Number(req.headers['simulated-day'])) === 1 &&
-    account !== undefined
+    findaccount !== undefined
   ) {
     return true;
   }
@@ -168,14 +163,14 @@ const validateInputPurchase = (req: Request): number => {
   );
   const purchaseproductId = purchaseproduct.id;
   const purchaseSimulationDay = Number(req.headers['simulated-day']);
-  const account = Accounts.find(
+  const findaccount = Accounts.find(
     (account) => account.id === req.params.accountId
   );
   // Validate Input
   if (
     // eslint-disable-next-line eqeqeq
     Math.sign(purchaseSimulationDay) != 1 ||
-    account === undefined ||
+    findaccount === undefined ||
     purchaseproductId === undefined
   ) {
     statuscode = 400;
@@ -187,13 +182,13 @@ const validateInputPurchase = (req: Request): number => {
   }
 
   if (
-    validateFunds(account.id, purchaseSimulationDay, purchaseproduct.id) ===
+    validateFunds(findaccount.id, purchaseSimulationDay, purchaseproduct.id) ===
     false
   ) {
     statuscode = 409;
     return statuscode;
   }
-  if (checkLegalPurchase(account.id, purchaseSimulationDay) === false) {
+  if (checkLegalPurchase(findaccount.id, purchaseSimulationDay) === false) {
     statuscode = 400;
     return statuscode;
   }
@@ -206,7 +201,7 @@ const registerPurchase = (req: Request, res: Response) => {
     return res.status(validatePurchase).send('None');
   }
   const account = Accounts.find(
-    (account) => account.id === req.params.accountId
+    (indaccount) => indaccount.id === req.params.accountId
   );
   const { productId } = req.body;
   const SimulatedDayPurchase: Purchases['SimulatedDayPurchase'] = Number(

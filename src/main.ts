@@ -23,6 +23,4 @@ app.get('/', (req, res) => {
   res.send({ message: 'welcome' });
 });
 
-app.listen(port, host, () => {
-  console.log(`[ ready ] http://${host}:${port}`);
-});
+app.listen(port, host, () => {});
