@@ -39,10 +39,10 @@ const getAllAccounts = (req: Request, res: Response) =>
 
 const getAccount = (req: Request, res: Response) => {
   try {
-    const getAccountdtl = Accounts.filter(
+    const getAccountdtl = Accounts.find(
       (Account) => Account.id === req.params.accountId
     );
-    if (getAccountdtl.length === 0) {
+    if (getAccountdtl === undefined) {
       res.status(404).send('None');
     } else {
       res.status(200).json(getAccountdtl);
@@ -122,6 +122,9 @@ const validateFunds = (
   productId: string
 ): boolean => {
   const account = Accounts.find((Account) => Account.id === accountId);
+  if (account.DepositDetails === undefined) {
+    return false;
+  }
   const depositbalanceonPurchaseDay = account.DepositDetails.reduce(
     (total, depostdtl) => {
       if (depostdtl.SimulatedDayDeposit + 1 <= simmulationDay) {
