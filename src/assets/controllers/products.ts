@@ -62,7 +62,7 @@ const getproductById = (req: Request, res: Response) => {
     const productdtls = productscopy.find(
       (product) => product.id === productId
     );
-    if (productdtls.length === 0) {
+    if (productdtls === undefined) {
       res.status(404).send('None');
     } else {
       const numberofSoldStocks = Accounts.getSoldProductCount(
