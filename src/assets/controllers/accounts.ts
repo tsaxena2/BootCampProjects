@@ -61,9 +61,9 @@ const getAccount = (req: Request, res: Response) => {
     if (getAccountdtl === undefined) {
       res.status(404).send('None');
     } else {
-      const {id} = getAccountdtl;
-      const {name} = getAccountdtl;
-      const {balance} = getAccountdtl;
+      const { id } = getAccountdtl;
+      const { name } = getAccountdtl;
+      const { balance } = getAccountdtl;
       const AccountResponse: GetAccountResponse = {
         id,
         name,
@@ -114,11 +114,24 @@ const registerDeposit = (req: Request, res: Response) => {
       SimulatedDayDeposit,
       depositdate,
     };
+    let balanceonDepositDay = 0;
+    if (account.DepositDetails !== undefined) {
+      balanceonDepositDay = account.DepositDetails.reduce(
+        (total, depostdtl) => {
+          if (depostdtl.SimulatedDayDeposit + 1 <= SimulatedDayDeposit) {
+            return total + depostdtl.amount;
+          }
+          return account.balance;
+        },
+        0
+      );
+    }
+
     account.DepositDetails.push(depositDetails);
     const registerDepositRes: RegisterDepositResponse = {
       id,
       name: account.name,
-      balance: amount,
+      balance: balanceonDepositDay,
     };
 
     return res.status(201).json(registerDepositRes);
