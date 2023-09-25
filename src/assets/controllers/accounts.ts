@@ -114,18 +114,16 @@ const registerDeposit = (req: Request, res: Response) => {
       SimulatedDayDeposit,
       depositdate,
     };
-    let balanceonDepositDay = 0;
-    if (account.DepositDetails !== undefined) {
-      balanceonDepositDay = account.DepositDetails.reduce(
-        (total, depostdtl) => {
-          if (depostdtl.SimulatedDayDeposit + 1 <= SimulatedDayDeposit) {
-            return total + depostdtl.amount;
-          }
-          return account.balance;
-        },
-        0
-      );
-    }
+
+    const balanceonDepositDay: number = account.DepositDetails.reduce(
+      (total, depostdtl) => {
+        if (depostdtl.SimulatedDayDeposit + 1 <= SimulatedDayDeposit) {
+          return total + depostdtl.amount;
+        }
+        return account.balance;
+      },
+      0
+    );
 
     account.DepositDetails.push(depositDetails);
     const registerDepositRes: RegisterDepositResponse = {
