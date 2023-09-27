@@ -30,9 +30,12 @@ const createAccount = (req: Request, res: Response) => {
   try {
     const id = uuidv4();
     const { name } = req.body;
+    if (name === undefined) {
+      return res.status(400).send('None');
+    }
     const balance = 0;
     Accounts.push({ id, name, balance });
-    return res.status(201).json({ id, name, balance });
+    return res.status(200).json({ id, name, balance });
   } catch (error) {
     return res.status(500).json('Something went wrong');
   }
